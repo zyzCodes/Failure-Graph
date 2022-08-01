@@ -8,7 +8,7 @@
 python -m venv venv
 source venv/scripts/activate 
 ```
-2. Create a settings.json file in the root folder and add Database Credentials
+2. Create a settings.json file in the root folder and populate Database Credentials
 3. Install requirements
 ```
 python3 install -r requirements.txt
@@ -24,7 +24,7 @@ python app.py
 python3 -m venv venv
 source venv/bin/activate 
 ```
-2. Create a settings.json file in the root folder and add Database Credentials
+2. Create a settings.json file in the root folder and populate Database Credentials
 3. Install requirements
 ```
 python3 install -r requirements.txt

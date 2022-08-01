@@ -154,10 +154,10 @@ def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, 
     if [p['prop_id'] for p in dash.callback_context.triggered][0]!='interval-component.n_intervals':
         changed_id=[p['prop_id'] for p in dash.callback_context.triggered][0]
     
-    proyect=usf.getProyectId(changed_id)
+    file=usf.getFile(changed_id)
     
 
-    sampledata = pd.read_csv(proyect)
+    sampledata = pd.read_csv(file)
 
     sampledata['DIF']=sampledata['DIF'].astype(str)
 

@@ -3,7 +3,7 @@
 ##  Set up guide ⚙️
 
 ***Windows***
-1. Make and activate venv
+1. Create and activate the venv
 ```
 python -m venv venv
 source venv/scripts/activate 
@@ -19,7 +19,7 @@ python app.py
 ```
 ***Linux/MacOS***
 
-1. Make and activate venv
+1. Create and activate the venv
 ```
 python3 -m venv venv
 source venv/bin/activate 

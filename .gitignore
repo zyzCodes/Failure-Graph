@@ -1,5 +1,3 @@
 __pycache__
-
 venv
-
-environment.py
+secret.json

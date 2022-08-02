@@ -25,10 +25,10 @@ class SQLConexion:
         startTime = startTime
         endTime = endTime
         if startTime is None or endTime is None:
-            startTime = '2020-05-20'
-            endTime = '2020-05-31'
-        startTime = "'" + startTime + "'"
-        endTime = "'" + endTime + "'"
+            startTime = "'2022-05-20'"
+            endTime = "'2022-05-31'"
+        startTime = "'{}'".format(startTime)
+        endTime = "'{}'".format(endTime)
         query = 'SELECT TOP (40000) * FROM [PPADB].[dbo].[View_Read_FLOATArchive] WHERE TagID = {0} AND RowUpdated > {1} AND RowUpdated < {2} ORDER BY RowUpdated'.format(tagID, startTime, endTime)
         self.df = pd.read_sql_query(query, self.cnxn)
         cursor.close()
@@ -54,10 +54,10 @@ class SQLConexion:
         turno = turno
         equipmentID = equipmentID
         if startTime is None or endTime is None:
-            startTime = '2020-05-20'
-            endTime = '2020-05-31'
-        startTime = "'" + startTime + "'"
-        endTime = "'" + endTime + "'"
+            startTime = '2022-05-20'
+            endTime = '2022-05-31'
+        startTime = "'{}'".format(startTime)
+        endTime = "'{}'".format(endTime)
         query = ' SELECT [Project],[EquipmentName] FROM [VisualPlant].[dbo].[WCRatesPlan] where Week = {0} and Day = {1} and Shift = {2} and EquipmentId = {3}'.format(semana, dia, turno, equipmentID)
         self.df = pd.read_sql_query(query, self.cnxn)
         cursor.close()

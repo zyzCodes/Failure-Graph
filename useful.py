@@ -52,5 +52,16 @@ def GetDatesToQuery(start_date, end_date, dropdown1, dropdown2, dropdown3, dropd
         end = end.strftime('%Y-%m-%d %H:%M')
     return (start, end, start_local_s, end_local_s)
 
-    
+def GetShift(hora):
+    if datetime.datetime.now().hour >= 6 and datetime.datetime.now().hour < 14:
+        shift = 1
+    else:
+        if datetime.datetime.now().hour >= 21 and datetime.datetime.now().hour <= 23:
+            shift = 3
+        else:
+            if datetime.datetime.now().hour >= 14 and datetime.datetime.now().hour < 21 or datetime.datetime.now().hour == 21 and datetime.datetime.now().minute < 30:
+                shift = 2
+            else:
+                shift = 3
+    return (shift) 
     

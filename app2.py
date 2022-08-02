@@ -4,13 +4,15 @@ import pandas as pd
 import plotly.express as px
 
 import plotly
+from plotly.offline import iplot
 import plotly.graph_objs as go
 import dash, dash_core_components as dcc, dash_html_components as html, dash_renderer
 from dash.dependencies import Input, Output, State
-from datetime import date, datetime as dt
 from plotly.subplots import make_subplots
 import plotly.subplots as sp
 import useful as usf
+import datetime
+from datetime import date, datetime as dt
 
 external_stylesheets = [
  'https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -142,28 +144,58 @@ changed_id='submit-val-01.n_clicks'
     Input('interval-component', 'children')],
     [State('datePicker', 'start_date'),
      State('datePicker', 'end_date'),
-     State('dropdown1', 'value'),
-     State('dropdown2', 'value'),
-     State('dropdown3', 'value'),
-     State('dropdown4', 'value')]
+     State('start_hour', 'value'),
+     State('start_minute', 'value'),
+     State('end_hour', 'value'),
+     State('end_minute', 'value')]
 )
-def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, dropdown3, dropdown4):
+def update_output(b1, b2, interval, start_date, end_date, start_hour, start_minute, end_hour, end_minute):
     global changed_id
-    figure1='test'
-    figure2='test'
+    
     if [p['prop_id'] for p in dash.callback_context.triggered][0]!='interval-component.n_intervals':
         changed_id=[p['prop_id'] for p in dash.callback_context.triggered][0]
         
     component_type=usf.getComponentType(changed_id)
     proyect_id=usf.getProyectId(changed_id)
-        
+    
+    hour = datetime.datetime.now().hour
+    date = datetime.datetime.now()
+    week = (dt.isocalendar(date)[1])
+    day = (dt.today().isoweekday())
+    shift= usf.GetShift(hour)
+    
+    
+    dates_to_query=usf.GetDatesToQuery(start_date, end_date, start_hour, start_minute, end_hour, end_minute)
+    
+    if type(dates_to_query) is str:
+        return ReturnDefaultOrError(dates_to_query)
+    start = dates_to_query[0]
+    end = dates_to_query[1]
+    start_local=dates_to_query[2]
+    end_local=dates_to_query[3]
+    
+    try:
+      df = parse_data(proyect_id, component_type, start, end)
+    except:
+      return ReturnDefaultOrError('The query could not be run or could not be connect to the database successfully.')
+    
+    
+  
+    
         
         
         
     
-    return(figure1, figure2)
+    return()
     
- 
+def parse_data(proyect_id, component_type, start, end):
+    env=env.Environment('development')
+    return()
+
+def ReturnDefaultOrError(error):
+    fig = go.Figure()
+    iplot(fig)
+    return (fig, error)
 
 if __name__ == '__main__':
     app.run_server(host='0.0.0.0', port='1237', debug=False, dev_tools_ui=False, dev_tools_props_check=False)

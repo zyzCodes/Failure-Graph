@@ -1,7 +1,7 @@
 import pyodbc, pandas as pd
 
 
-class SQLConexion:
+class SQLConnection:
 
     def __init__(self, env):
         self.server = env.Server()
@@ -20,8 +20,11 @@ class SQLConexion:
                   DATABASE=(self.database))
         self.df = pd.DataFrame()
 
-    def ExecuteQueryDataFrame(self, tagID, startTime, endTime):
+    def ExecuteQueryDataFrame(self, proyect_id, component_type,startTime, endTime):
         cursor = self.cnxn.cursor()
+        db=self.database
+        proyect_id=proyect_id
+        component_type=component_type
         startTime = startTime
         endTime = endTime
         if startTime is None or endTime is None:
@@ -29,7 +32,9 @@ class SQLConexion:
             endTime = "'2022-05-31'"
         startTime = "'{}'".format(startTime)
         endTime = "'{}'".format(endTime)
-        query = 'SELECT TOP (40000) * FROM [PPADB].[dbo].[View_Read_FLOATArchive] WHERE TagID = {0} AND RowUpdated > {1} AND RowUpdated < {2} ORDER BY RowUpdated'.format(tagID, startTime, endTime)
+        # SELECT TOP (100) [SeqNo], [Date], [UTC Time], [FALLA], [ESTADO], [CODIGO], [FECHAMASTIEMPO], [DIF], [TIPO] FROM [EuroDigSysDB].[dbo].[FallasED40]
+        # where FECHAMASTIEMPO BETWEEN '2022-04-08 13:00:00' and '2022-04-08 14:00:00' and TIPO like 'EST'
+        query = "SELECT TOP (100) [SeqNo], [Date], [UTC Time], [FALLA], [ESTADO], [CODIGO], [FECHAMASTIEMPO], [DIF], [TIPO] FROM [{0}].[dbo].[{1}] WHERE FECHAMASTIEMPO BETWEEN '{2}' and '{3}' and TIPO like '{4}'".format(db, proyect_id, startTime, endTime, component_type)
         self.df = pd.read_sql_query(query, self.cnxn)
         cursor.close()
         return self.df

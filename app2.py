@@ -12,6 +12,7 @@ from plotly.subplots import make_subplots
 import plotly.subplots as sp
 import useful as usf
 import datetime
+import db
 from datetime import date, datetime as dt
 
 external_stylesheets = [
@@ -176,21 +177,20 @@ def update_output(b1, b2, interval, start_date, end_date, start_hour, start_minu
     
     try:
       df = parse_data(proyect_id, component_type, start, end)
+      print(df)
     except:
       return ReturnDefaultOrError('The query could not be run or could not be connect to the database successfully.')
-    
-    
-  
-    
         
         
         
     
-    return()
+    return(df)
     
 def parse_data(proyect_id, component_type, start, end):
     env=env.Environment('development')
-    return()
+    conx=db.SQLConnection(env)
+    conx.ExecuteQueryDataFrame(proyect_id, component_type, start, end)
+    return conx.GetDF()
 
 def ReturnDefaultOrError(error):
     fig = go.Figure()

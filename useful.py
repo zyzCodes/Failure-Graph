@@ -1,7 +1,3 @@
-
-
-
-
 IDs={
     '.':'data/sampledata.csv',
     'submit-val-01.n_clicks':'data/sampledata.csv',

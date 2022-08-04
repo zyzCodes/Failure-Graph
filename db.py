@@ -32,7 +32,7 @@ class SQLConnection:
         endTime = "'{}'".format(endTime)
         # SELECT TOP (100) [SeqNo], [Date], [UTC Time], [FALLA], [ESTADO], [CODIGO], [FECHAMASTIEMPO], [DIF], [TIPO] FROM [EuroDigSysDB].[dbo].[FallasED40]
         # where FECHAMASTIEMPO BETWEEN '2022-04-08 13:00:00' and '2022-04-08 14:00:00' and TIPO like 'EST'
-        query = "SELECT TOP (100) [Date], [UTC Time], [FALLA], [FECHAMASTIEMPO], [DIF], [TIPO] FROM [EuroDigSysDB].[dbo].[{0}] WHERE FECHAMASTIEMPO BETWEEN {1} and {2} and TIPO like '{3}'".format(proyect_id, startTime, endTime, component_type)
+        query = "SELECT TOP (100) [Date], [UTC Time], [FALLA], [FECHAMASTIEMPO], [DIF], [TIPO] FROM [{0}].[dbo].[{1}] WHERE FECHAMASTIEMPO BETWEEN {2} and {3} and TIPO like '{4}'".format(db, proyect_id, startTime, endTime, component_type)
         self.df = pd.read_sql_query(query, self.cnxn)
         cursor.close()
         return self.df

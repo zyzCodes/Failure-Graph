@@ -2,7 +2,7 @@
 import datetime 
 import useful as usf
 import db
-import environment as env
+import logging, numpy as np, pandas as pd, statistics as stats, db, datetime, time, environment,useful as usf
 from datetime import date, datetime as dt
 
 
@@ -28,14 +28,14 @@ from datetime import date, datetime as dt
     #return()
     
     
-def parse_data(env, proyect_id, component_type, start, end):
-    env=env
-    conx=db.SQLConnection(env)
+def parse_data(proyect_id, component_type, start, end):
+    envi=environment.Environment('production')
+    print(envi.Environment())
+    conx=db.SQLConnection(envi)
     conx.ExecuteQueryDataFrame(proyect_id, component_type, start, end)
     return conx.GetDF()
 
-env=env.Environment('development')
-df=parse_data(env, 'FALLASED40', 'EST', '2022-04-08 13:00:00', '2022-04-08 14:00:00')
+df=parse_data('FALLASED40', 'EST', '2022-04-08 13:00:00', '2022-04-08 14:00:00')
      
 print(df)
     

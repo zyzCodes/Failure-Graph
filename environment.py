@@ -6,7 +6,7 @@ class Environment:
         with open("secret.json", "r") as read_file:
             credentials = json.load(read_file)
             
-        self.environment = credentials['environment']
+        self.environment = environment
         if environment == 'production':
             self.server = credentials['server']
             self.database = credentials['db']

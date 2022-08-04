@@ -32,3 +32,5 @@ python3 install -r requirements.txt
 4. Initiate the app
 ```
 python3 app.py
+```
+Note: You might have to install OBSCD SQL driver from Microsoft

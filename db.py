@@ -43,8 +43,10 @@ class SQLConnection:
             if col in lista:
                 del self.df[col]
 
-    def PrintQueryResult(self):
-        pass
+    def StripString(self, column):
+        self.df[column]=self.df[column].str.strip()
+    
+        
 
     def GetDF(self):
         return self.df

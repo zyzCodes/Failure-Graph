@@ -159,28 +159,18 @@ def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, 
     component_type=usf.getComponentType(changed_id)
     proyect_id=usf.getProyectId(changed_id)
     
-    
-    df = parse_data(proyect_id, component_type, '2022-04-08 13:00:00', '2022-04-08 19:30:00')
-    #except:
-      #return ReturnDefaultOrError('The query could not be run or could not be connect to the database successfully.')
-    
-    #file=usf.getFile(changed_id)
-    
+    df = parse_data(proyect_id, component_type, '2022-04-08 13:00:00', '2022-04-08 19:30:00')  
 
     sampledata = df
-
     sampledata['DIF']=sampledata['DIF'].astype(str)
-
-    sampledata['DIF']=sampledata['DIF'].str.slice(10,19)
-
+    sampledata['DIF']=sampledata['DIF'].str.slice(10,19)    
     sampledata['DIF']=pd.to_timedelta(sampledata['DIF'])
-
     sampledata.insert(1, 'MINUTES', sampledata['DIF'].dt.total_seconds().div(60).astype(int))
     
-    sampledata['FALLA']=sampledata['FALLA'].str.strip()
     
     print(sampledata)
     
+    #BARCHART-----------------------------------------------------------------------------------------------------------
     figure1 = px.bar(sampledata, x='MINUTES', y='FALLA', color='FALLA', orientation='h')
     figure1.update_layout(
         title='FALLAS',
@@ -201,13 +191,10 @@ def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, 
     figure1.update_traces(
         width=0.5
     )
-    
+    #PIE GRAPH---------------------------------------------------------------------------------------------------------------
     raw=pd.DataFrame({'FALLA':sampledata['FALLA']})
-
     s=raw['FALLA'].value_counts()
-
     new = pd.DataFrame({'FALLA':s.index, 'FRECUENCIA':s.values})
-
     figure2=px.pie(new, values='FRECUENCIA', names='FALLA', title='Frecuencia de los Fallos.')  
     
     return(figure1, figure2)
@@ -218,6 +205,8 @@ def parse_data(proyect_id, component_type, start, end):
     conx=db.SQLConnection(env)
     conx.ExecuteQueryDataFrame(proyect_id, component_type, start, end)
     conx.RemoveColumns()
+    
+    conx.StripString('FALLA')
     return conx.GetDF()
 
 def ReturnDefaultOrError(error):

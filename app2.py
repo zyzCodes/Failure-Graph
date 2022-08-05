@@ -165,7 +165,11 @@ def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, 
     start_local_time=selected_dates[2]
     end_local_time=selected_dates[3]
     
-    df = parse_data(proyect_id, component_type, '2022-04-08 13:00:00', '2022-04-08 19:30:00')  #makes query
+    print('-------------------------------------------------------------------------------------------------------------------------------------')
+    print(start_time, end_time, start_local_time, end_local_time)
+    print('-------------------------------------------------------------------------------------------------------------------------------------')
+    #'2022-04-08 13:00:00', '2022-04-08 19:30:00'
+    df = parse_data(proyect_id, component_type, start_time, end_time)  #makes query
 
     sampledata = df
     sampledata['DIF']=sampledata['DIF'].astype(str)

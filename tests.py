@@ -1,4 +1,4 @@
-
+import json
 from optparse import Values
 from turtle import width
 from dash import Dash, html, dcc
@@ -13,7 +13,6 @@ import plotly.graph_objs as go
 from collections import deque
 from dash.dependencies import Input, Output, State
 from datetime import date, datetime as dt
-import matplotlib
 
 external_stylesheets = [
  'https://codepen.io/chriddyp/pen/bWLwgP.css']

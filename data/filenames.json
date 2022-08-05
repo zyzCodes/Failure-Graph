@@ -1,0 +1,5 @@
+{
+    ".":"data/sampledata.csv",   
+    "submit-val-01.n_clicks":"data/sampledata.csv",
+    "submit-val-02.n_clicks":"data/sampledata2.csv"
+}

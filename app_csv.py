@@ -30,14 +30,14 @@ def optionlist(x):
     Returns option label and value that will be used 
     as the start-date/end-date input for the graph
     """
-    optionlista=[]
+    optionlist=[]
     for i in range(0,x+1):
         if i<=9:
             option={'label': '0{}'.format(i), 'value': '0{}'.format(i)}
         else:
             option={'label': '{}'.format(i), 'value': '{}'.format(i)}
-        optionlista.append(option)
-    return optionlista
+        optionlist.append(option)
+    return optionlist
 
 app.layout=html.Div([  
 #START PAGE CONENT--------------------------------------------------------------------------------------------------------
@@ -149,21 +149,57 @@ changed_id='submit-val-01.n_clicks'
 )
 def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, dropdown3, dropdown4):
     global changed_id
-    figure1='test'
-    figure2='test'
+  
+
     if [p['prop_id'] for p in dash.callback_context.triggered][0]!='interval-component.n_intervals':
         changed_id=[p['prop_id'] for p in dash.callback_context.triggered][0]
-        
-    component_type=usf.getComponentType(changed_id)
-    proyect_id=usf.getProyectId(changed_id)
-        
-        
-        
-        
     
-    return(figure1, figure2)
+    file=usf.getFile(changed_id)
     
- 
+
+    sampledata = pd.read_csv(file)
+
+    sampledata['DIF']=sampledata['DIF'].astype(str)
+
+    sampledata['DIF']=sampledata['DIF'].str.slice(10,19)
+
+    sampledata['DIF']=pd.to_timedelta(sampledata['DIF'])
+
+    sampledata.insert(2, 'MINUTES', sampledata['DIF'].dt.total_seconds().div(60).astype(int))
+
+    print(sampledata)
+
+
+    figure1 = px.bar(sampledata, x='MINUTES', y='FALLA', color='FALLA', orientation='h')
+    figure1.update_layout(
+        title='FALLAS',
+        xaxis = dict(
+            title='TIME (minutes)', 
+            rangeslider = dict(
+                visible=True, 
+                thickness=0.05
+            )
+        ), 
+        yaxis = dict(
+            title='FALLA'
+            
+        ), 
+        paper_bgcolor='#FFFFFF', 
+        showlegend=False,
+    )
+    figure1.update_traces(
+        width=0.5
+    )
+    
+    raw=pd.DataFrame({'FALLA':sampledata['FALLA']})
+
+    s=raw['FALLA'].value_counts()
+
+    new = pd.DataFrame({'FALLA':s.index, 'FRECUENCIA':s.values})
+
+    figure2=px.pie(new, values='FRECUENCIA', names='FALLA', title='Frecuencia de los Fallos.')      
+
+    return (figure1, figure2)
 
 if __name__ == '__main__':
     app.run_server(host='0.0.0.0', port='1237', debug=False, dev_tools_ui=False, dev_tools_props_check=False)

@@ -10,7 +10,7 @@ IDs={
 
 =======
 import json
-import datetime, time as utz
+import datetime, time, usefultimezone as utz, useful as usf
 from datetime import datetime as dt
 
 
@@ -29,7 +29,7 @@ def getFile(changed_id):
 >>>>>>> 28dda889068749bd6689b3b45df95bcc680f3984
 
 def getProyectId(changed_id):
-    with open("data/proyectsid.json", "r") as read_file:
+    with open("data/proyectsids.json", "r") as read_file:
         proyectsids = json.load(read_file)
     project_id=proyectsids[changed_id]
     return project_id
@@ -64,5 +64,16 @@ def GetDatesToQuery(start_date, end_date, dropdown1, dropdown2, dropdown3, dropd
         end = end.strftime('%Y-%m-%d %H:%M')
     return (start, end, start_local_s, end_local_s)
 
-    
+def GetShift(hora):
+    if datetime.datetime.now().hour >= 6 and datetime.datetime.now().hour < 14:
+        shift = 1
+    else:
+        if datetime.datetime.now().hour >= 21 and datetime.datetime.now().hour <= 23:
+            shift = 3
+        else:
+            if datetime.datetime.now().hour >= 14 and datetime.datetime.now().hour < 21 or datetime.datetime.now().hour == 21 and datetime.datetime.now().minute < 30:
+                shift = 2
+            else:
+                shift = 3
+    return (shift) 
     

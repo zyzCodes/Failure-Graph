@@ -2,15 +2,18 @@ from dash import Dash, html, dcc
 import plotly.express as px
 import pandas as pd
 import plotly.express as px
-
+import environment
 import plotly
+from plotly.offline import iplot
 import plotly.graph_objs as go
 import dash, dash_core_components as dcc, dash_html_components as html, dash_renderer
 from dash.dependencies import Input, Output, State
-from datetime import date, datetime as dt
 from plotly.subplots import make_subplots
 import plotly.subplots as sp
 import useful as usf
+import datetime
+import db
+from datetime import date, datetime as dt
 
 external_stylesheets = [
  'https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -18,12 +21,11 @@ colors = {'graphBackground':'#f5f5f5',
  'background':'#ffffff', 
  'text':'#000000'}
 
-
 app=dash.Dash(__name__, external_stylesheets=external_stylesheets)
-app.title='Press Failures - Dashboard'
+app.title='Project Failure - Dashboard'
 server=app.server
 
-
+changed_id='submit-val-01.n_clicks'
 
 def optionlist(x):
     """
@@ -118,25 +120,20 @@ app.layout=html.Div([
         html.Hr(style={'margin-bottom':'10px'}),
         dcc.Graph(id='Piegraph'),
     ], style={'margin':'20px'}),
+    
 
     html.Div([
         html.Hr(style={'margin-bottom': '10px'}),
-        html.Label('Press Failure - Dashboard v1.0'),
+        html.Label('Project Failure - Dashboard v1.0'),
        # html.Label('Updated by Diego Arana'),
         html.Label('@ Eurotranciatura Mexico. July, 2022')
     ], style={'margin':'20px'}),
-    
-    
-    
 #END PAGE CONTENT------------------------------------------------------------------------------------------------------------------------------------------
 ])  
-
-
-changed_id='submit-val-01.n_clicks'
-
 @app.callback(
-    Output('Mygraph', 'figure'),
-    Output('Piegraph', 'figure'),
+    [Output('Mygraph', 'figure'),
+    Output('Piegraph', 'figure')],
+    #Output('piegraph-tpt', 'children'),
     [Input('submit-val-01', 'n_clicks'),
     Input('submit-val-02', 'n_clicks'),
     Input('interval-component', 'children')],
@@ -149,57 +146,117 @@ changed_id='submit-val-01.n_clicks'
 )
 def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, dropdown3, dropdown4):
     global changed_id
-  
-
+    
     if [p['prop_id'] for p in dash.callback_context.triggered][0]!='interval-component.n_intervals':
         changed_id=[p['prop_id'] for p in dash.callback_context.triggered][0]
+        
+    component_type=usf.getComponentType(changed_id)
+    proyect_id=usf.getProyectId(changed_id)
     
-    file=usf.getFile(changed_id)
-    
+    selected_dates=usf.GetDatesToQuery(start_date, end_date, dropdown1, dropdown2, dropdown3, dropdown4)
+    start_time=selected_dates[0]
+    end_time=selected_dates[1]
+    start_local_time=selected_dates[2]
+    end_local_time=selected_dates[3]
+    now=datetime.datetime.strptime(end_time, '%Y-%m-%d %H:%M')
+    then=datetime.datetime.strptime(start_time, '%Y-%m-%d %H:%M')
+    total_time=now-then
+    #'2022-04-08 13:00:00', '2022-04-08 19:30:00'
+    df = parse_data(proyect_id, component_type, start_time, end_time)  #makes query
 
-    sampledata = pd.read_csv(file)
-
+    sampledata = df
     sampledata['DIF']=sampledata['DIF'].astype(str)
-
-    sampledata['DIF']=sampledata['DIF'].str.slice(10,19)
-
+    sampledata['DIF']=sampledata['DIF'].str.slice(10,19)    
     sampledata['DIF']=pd.to_timedelta(sampledata['DIF'])
-
-    sampledata.insert(2, 'MINUTES', sampledata['DIF'].dt.total_seconds().div(60).astype(int))
-
-
-
-
+    sampledata.insert(1, 'MINUTES', sampledata['DIF'].dt.total_seconds().div(60).astype(int))
+    del sampledata['DIF']
+    print('####################################################################################')
+    df=sampledata
+    data=['Tiempo Total', total_time]
+    print(total_time)
+    dftt=pd.DataFrame([data], columns=['FALLA', 'DIF'])
+    dftt.insert(1, 'MINUTES', dftt['DIF'].dt.total_seconds().div(60).astype(int))
+    total_failure_time=0
+    for i in sampledata['MINUTES']:
+        total_failure_time+=i
+    total_productive_time=0
+    for i in dftt['MINUTES']:
+        total_productive_time+=i
+    total_productive_time-=total_failure_time
+    print('####################################################################################')
+    data=['Total Productive Time', total_productive_time]
+    dftpt=pd.DataFrame([data], columns=['FALLA', 'MINUTES'])
+    df=pd.concat([dftpt, df], ignore_index=True)
+    print(df)
+    
+    
+    #BARCHART-----------------------------------------------------------------------------------------------------------
     figure1 = px.bar(sampledata, x='MINUTES', y='FALLA', color='FALLA', orientation='h')
     figure1.update_layout(
-        title='FALLAS',
+        title=str(proyect_id)+' '+str(component_type)+' from {0} to {1}.'.format(start_local_time, end_local_time),
         xaxis = dict(
             title='TIME (minutes)', 
             rangeslider = dict(
                 visible=True, 
                 thickness=0.05
             )
-        ), 
+        ),
         yaxis = dict(
             title='FALLA'
             
         ), 
         paper_bgcolor='#FFFFFF', 
-        showlegend=True,
+        showlegend=False,
     )
     figure1.update_traces(
         width=0.5
     )
-    
+    #PIE GRAPH---------------------------------------------------------------------------------------------------------------
     raw=pd.DataFrame({'FALLA':sampledata['FALLA']})
-
     s=raw['FALLA'].value_counts()
-
     new = pd.DataFrame({'FALLA':s.index, 'FRECUENCIA':s.values})
+    failure_list=[]
+    frecuencylist=[]
+    minutelist=[]
+    for i in new['FRECUENCIA']:
+        frecuencylist.append(i)
+    for i in new['FALLA']:
+        failure_list.append(i)
+    for i in df['MINUTES']:
+        minutelist.append(i)
+    print(minutelist)
+   # figure2=px.pie(new, values='FRECUENCIA', names='FALLA', title='Faillure Frequency.')  
+    
+    figure2 = make_subplots(rows=1, cols=2, subplot_titles=['Failure Frecuency', 'Total Time = {0}'.format(total_time)], specs=[[{'type':'domain'}, {'type':'domain'}]])
+    figure2.add_trace(go.Pie(labels=failure_list, values=frecuencylist, name="Failure Frecuency"),
+              1, 1)
+    
+    failure_list.insert(0, 'TOTAL PRODUCTIVE TIME (within time interval selected)')
+    
+    print(failure_list)
+    
+    figure2.add_trace(go.Pie(labels=failure_list, values=minutelist, name="Total Time"),
+              1, 2)
+    return(figure1, figure2)
 
-    figure2=px.pie(new, values='FRECUENCIA', names='FALLA', title='Frecuencia de los Fallos.')      
 
-    return (figure1, figure2)
+
+ 
+def parse_data(proyect_id, component_type, start, end):
+    env=environment.Environment('production')
+    conx=db.SQLConnection(env)
+    conx.ExecuteQueryDataFrame(proyect_id, component_type, start, end)
+    conx.RemoveColumns()
+    
+    conx.StripString('FALLA')
+    return conx.GetDF()
+
+def ReturnDefaultOrError(error):
+    fig = go.Figure()
+    iplot(fig)
+    return (fig, error)
 
 if __name__ == '__main__':
     app.run_server(host='0.0.0.0', port='1237', debug=False, dev_tools_ui=False, dev_tools_props_check=False)
+    
+    

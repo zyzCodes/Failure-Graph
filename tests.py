@@ -1,79 +1,52 @@
-import json
-from optparse import Values
-from turtle import width
-from dash import Dash, html, dcc
-import plotly.express as px
-import pandas as pd
-from pandas import Series
-from datetime import datetime
-import plotly.express as px
-
-import plotly
-import plotly.graph_objs as go
-from collections import deque
-from dash.dependencies import Input, Output, State
+#Write your tests here
+import datetime 
+import useful as usf
+import db
+import logging, numpy as np, pandas as pd, statistics as stats, db, datetime, time, environment,useful as usf
 from datetime import date, datetime as dt
 
-external_stylesheets = [
- 'https://codepen.io/chriddyp/pen/bWLwgP.css']
-colors = {'graphBackground':'#f5f5f5', 
- 'background':'#ffffff', 
- 'text':'#000000'}
 
 
+#def queryTest(start_date, end_date, start_hour, start_minute, end_hour, end_minute, env, changed_id):
+    
+    #component_type=usf.getComponentType(changed_id)
+    #proyect_id=usf.getProyectId(changed_id)
+    
+    #hour = datetime.datetime.now().hour
+    #date = datetime.datetime.now()
+    #week = (dt.isocalendar(date)[1])
+    #day = (dt.today().isoweekday())
+    #shift= usf.GetShift(hour)
+    
+    #dates_to_query=usf.GetDatesToQuery(start_date, end_date, start_hour, start_minute, end_hour, end_minute)
+    
+    #start = dates_to_query[0]
+    #end = dates_to_query[1]
+    #start_local=dates_to_query[2]
+    #end_local=dates_to_query[3]
+    
+    #return()
+    
+    
+def parse_data(proyect_id, component_type, start, end):
+    envi=environment.Environment('production')
+    print(envi.Environment())
+    conx=db.SQLConnection(envi)
+    conx.ExecuteQueryDataFrame(proyect_id, component_type, start, end)
+    return conx.GetDF()
 
-def optionlist(x):
-    """
-    Returns option label and value that will be used 
-    as the start-date/end-date input for the graph
-    """
-    optionlista=[]
-    for i in range(0,x+1):
-        if i<=9:
-            option={'label': '0{}'.format(i), 'value': '0{}'.format(i)}
-        else:
-            option={'label': '{}'.format(i), 'value': '{}'.format(i)}
-        optionlista.append(option)
-    print(optionlista)
-    return optionlista
+df=parse_data('FALLASED40', 'EST', '2022-04-08 13:00:00', '2022-04-08 14:00:00')
 
+sampledata=df
 
-#optionlist(52)
+sampledata['DIF']=sampledata['DIF'].astype(str)
 
+sampledata['DIF']=sampledata['DIF'].str.slice(10,19)
 
+sampledata['DIF']=pd.to_timedelta(sampledata['DIF'])
 
-"TEST DE OBTENCION DE FRECUENCIA"
+sampledata.insert(6, 'MINUTES', sampledata['DIF'].dt.total_seconds().div(60).astype(int))
 
+print(sampledata)
 
-sampledata = pd.read_csv(r'sampledata.csv')
-
-raw=pd.DataFrame({'FuncGroup':sampledata['FALLA']})
-
-s=raw['FuncGroup'].value_counts()
-
-
-new = pd.DataFrame({'FuncGroup':s.index, 'Count':s.values})
-
-piefig=px.pie(new, values='Count', names='FuncGroup', title='Frecuencia de los Fallos.')
-piefig.show()
-
-
-
-figure1='test'
-figure2='test2'
-figure1_traces = []
-figure2_traces = []
-this_figure="test3"
-for trace in range(len(figure1["data"])):
-    figure1_traces.append(figure1["data"][trace])
-for trace in range(len(figure2["data"])):
-    figure2_traces.append(figure2["data"][trace])
-
-#Create a 1x2 subplot
-#this_figure = sp.make_subplots(rows=1, cols=2, specs=[[{"type":"bar"}, {"type":"pie"}]]) 
-
-# Get the Express fig broken down as traces and add the traces to the proper plot within in the subplot
-for traces in figure1_traces:
-    this_figure.append_trace(traces, row=1, col=1)
-for traces in figure2_traces:
-    this_figure.append_trace(traces, row=1, col=2)
+    

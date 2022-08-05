@@ -170,10 +170,8 @@ def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, 
     sampledata['DIF']=pd.to_timedelta(sampledata['DIF'])
     sampledata.insert(1, 'MINUTES', sampledata['DIF'].dt.total_seconds().div(60).astype(int))
     del sampledata['DIF']
-    print('####################################################################################')
     df=sampledata
     data=['Tiempo Total', total_time]
-    print(total_time)
     dftt=pd.DataFrame([data], columns=['FALLA', 'DIF'])
     dftt.insert(1, 'MINUTES', dftt['DIF'].dt.total_seconds().div(60).astype(int))
     total_failure_time=0
@@ -188,6 +186,7 @@ def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, 
     dftpt=pd.DataFrame([data], columns=['FALLA', 'MINUTES'])
     df=pd.concat([dftpt, df], ignore_index=True)
     print(df)
+    
     
     
     #BARCHART-----------------------------------------------------------------------------------------------------------
@@ -218,24 +217,29 @@ def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, 
     failure_list=[]
     frecuencylist=[]
     minutelist=[]
+    failure_list2=[]
     for i in new['FRECUENCIA']:
         frecuencylist.append(i)
     for i in new['FALLA']:
         failure_list.append(i)
     for i in df['MINUTES']:
         minutelist.append(i)
+    for i in df['FALLA']:
+        failure_list2.append(i)
+        
     print(minutelist)
+    print(failure_list2)
    # figure2=px.pie(new, values='FRECUENCIA', names='FALLA', title='Faillure Frequency.')  
     
     figure2 = make_subplots(rows=1, cols=2, subplot_titles=['Failure Frecuency', 'Total Time = {0}'.format(total_time)], specs=[[{'type':'domain'}, {'type':'domain'}]])
     figure2.add_trace(go.Pie(labels=failure_list, values=frecuencylist, name="Failure Frecuency"),
               1, 1)
     
-    failure_list.insert(0, 'TOTAL PRODUCTIVE TIME (within time interval selected)')
     
-    print(failure_list)
     
-    figure2.add_trace(go.Pie(labels=failure_list, values=minutelist, name="Total Time"),
+    
+    
+    figure2.add_trace(go.Pie(labels=failure_list2, values=minutelist, name="Total Time"),
               1, 2)
     return(figure1, figure2)
 

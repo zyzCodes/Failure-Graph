@@ -1,14 +1,3 @@
-<<<<<<< HEAD
-IDs={
-    '.':'data/sampledata.csv',
-    'submit-val-01.n_clicks':'data/sampledata.csv',
-    'submit-val-02.n_clicks':'data/sampledata2.csv',
-}
-
-
-
-
-=======
 import json
 import datetime, time, usefultimezone as utz, useful as usf
 from datetime import datetime as dt
@@ -26,7 +15,7 @@ def getFile(changed_id):
         files = json.load(read_file)  
     file=files[changed_id]
     return file
->>>>>>> 28dda889068749bd6689b3b45df95bcc680f3984
+
 
 def getProyectId(changed_id):
     with open("data/proyectsids.json", "r") as read_file:

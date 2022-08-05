@@ -17,7 +17,7 @@ def getFile(changed_id):
     return file
 
 def getProyectId(changed_id):
-    with open("data/proyectsid.json", "r") as read_file:
+    with open("data/proyectsids.json", "r") as read_file:
         proyectsids = json.load(read_file)
     project_id=proyectsids[changed_id]
     return project_id

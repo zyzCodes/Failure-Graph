@@ -13,9 +13,8 @@ class SQLConnection:
               DATABASE=(self.database),
               UID=(self.username),
               PWD=(self.password))
-        else:
-            if env.Environment() == 'development':
-                self.cnxn = pyodbc.connect(TRUSTED_CONNECTION='Yes', DRIVER='{ODBC Driver 17 for SQL Server}', SERVER=(self.server), DATABASE=(self.database))
+        elif env.Environment() == 'development':
+            self.cnxn = pyodbc.connect(TRUSTED_CONNECTION='Yes', DRIVER='{SQL Server}', SERVER=(self.server), DATABASE=(self.database))
         self.df = pd.DataFrame()
 
     def ExecuteQueryDataFrame(self, proyect_id, component_type, startTime, endTime):
@@ -32,14 +31,14 @@ class SQLConnection:
         endTime = "'{}'".format(endTime)
         # SELECT TOP (100) [SeqNo], [Date], [UTC Time], [FALLA], [ESTADO], [CODIGO], [FECHAMASTIEMPO], [DIF], [TIPO] FROM [EuroDigSysDB].[dbo].[FallasED40]
         # where FECHAMASTIEMPO BETWEEN '2022-04-08 13:00:00' and '2022-04-08 14:00:00' and TIPO like 'EST'
-        query = "SELECT TOP (100) [Date], [UTC Time], [FALLA], [FECHAMASTIEMPO], [DIF], [TIPO] FROM [{0}].[dbo].[{1}] WHERE FECHAMASTIEMPO BETWEEN {2} and {3} and TIPO like '{4}'".format(db, proyect_id, startTime, endTime, component_type)
+        query = "SELECT TOP (10) [Date], [UTC Time], [FALLA], [FECHAMASTIEMPO], [DIF], [TIPO] FROM [{0}].[dbo].[{1}] WHERE FECHAMASTIEMPO BETWEEN {2} and {3} and TIPO like '{4}'".format(db, proyect_id, startTime, endTime, component_type)
         self.df = pd.read_sql_query(query, self.cnxn)
         cursor.close()
         return self.df
 
     def RemoveColumns(self):
         lista = [
-         'TagID', 'Time', 'Msec', 'Status']
+         'Date', 'UTC Time', 'FECHAMASTIEMPO', 'TIPO']
         for col in self.df.columns:
             if col in lista:
                 del self.df[col]

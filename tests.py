@@ -36,6 +36,17 @@ def parse_data(proyect_id, component_type, start, end):
     return conx.GetDF()
 
 df=parse_data('FALLASED40', 'EST', '2022-04-08 13:00:00', '2022-04-08 14:00:00')
-     
-print(df)
+
+sampledata=df
+
+sampledata['DIF']=sampledata['DIF'].astype(str)
+
+sampledata['DIF']=sampledata['DIF'].str.slice(10,19)
+
+sampledata['DIF']=pd.to_timedelta(sampledata['DIF'])
+
+sampledata.insert(6, 'MINUTES', sampledata['DIF'].dt.total_seconds().div(60).astype(int))
+
+print(sampledata)
+
     

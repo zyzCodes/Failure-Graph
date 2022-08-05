@@ -2,18 +2,15 @@ from dash import Dash, html, dcc
 import plotly.express as px
 import pandas as pd
 import plotly.express as px
-import environment
+
 import plotly
-from plotly.offline import iplot
 import plotly.graph_objs as go
 import dash, dash_core_components as dcc, dash_html_components as html, dash_renderer
 from dash.dependencies import Input, Output, State
+from datetime import date, datetime as dt
 from plotly.subplots import make_subplots
 import plotly.subplots as sp
 import useful as usf
-import datetime
-import db
-from datetime import date, datetime as dt
 
 external_stylesheets = [
  'https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -33,14 +30,14 @@ def optionlist(x):
     Returns option label and value that will be used 
     as the start-date/end-date input for the graph
     """
-    optionlista=[]
+    optionlist=[]
     for i in range(0,x+1):
         if i<=9:
             option={'label': '0{}'.format(i), 'value': '0{}'.format(i)}
         else:
             option={'label': '{}'.format(i), 'value': '{}'.format(i)}
-        optionlista.append(option)
-    return optionlista
+        optionlist.append(option)
+    return optionlist
 
 app.layout=html.Div([  
 #START PAGE CONENT--------------------------------------------------------------------------------------------------------
@@ -152,33 +149,27 @@ changed_id='submit-val-01.n_clicks'
 )
 def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, dropdown3, dropdown4):
     global changed_id
-    
+  
+
     if [p['prop_id'] for p in dash.callback_context.triggered][0]!='interval-component.n_intervals':
         changed_id=[p['prop_id'] for p in dash.callback_context.triggered][0]
-        
-    component_type=usf.getComponentType(changed_id)
-    proyect_id=usf.getProyectId(changed_id)
     
-    selected_dates=usf.GetDatesToQuery(start_date, end_date, dropdown1, dropdown2, dropdown3, dropdown4)
-    start_time=selected_dates[0]
-    end_time=selected_dates[1]
-    start_local_time=selected_dates[2]
-    end_local_time=selected_dates[3]
+    file=usf.getFile(changed_id)
     
-    print('-------------------------------------------------------------------------------------------------------------------------------------')
-    print(start_time, end_time, start_local_time, end_local_time)
-    print('-------------------------------------------------------------------------------------------------------------------------------------')
-    #'2022-04-08 13:00:00', '2022-04-08 19:30:00'
-    df = parse_data(proyect_id, component_type, start_time, end_time)  #makes query
 
-    sampledata = df
+    sampledata = pd.read_csv(file)
+
     sampledata['DIF']=sampledata['DIF'].astype(str)
-    sampledata['DIF']=sampledata['DIF'].str.slice(10,19)    
+
+    sampledata['DIF']=sampledata['DIF'].str.slice(10,19)
+
     sampledata['DIF']=pd.to_timedelta(sampledata['DIF'])
-    sampledata.insert(1, 'MINUTES', sampledata['DIF'].dt.total_seconds().div(60).astype(int))
+
+    sampledata.insert(2, 'MINUTES', sampledata['DIF'].dt.total_seconds().div(60).astype(int))
+
     print(sampledata)
-    
-    #BARCHART-----------------------------------------------------------------------------------------------------------
+
+
     figure1 = px.bar(sampledata, x='MINUTES', y='FALLA', color='FALLA', orientation='h')
     figure1.update_layout(
         title='FALLAS',
@@ -188,7 +179,7 @@ def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, 
                 visible=True, 
                 thickness=0.05
             )
-        ),
+        ), 
         yaxis = dict(
             title='FALLA'
             
@@ -199,30 +190,16 @@ def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, 
     figure1.update_traces(
         width=0.5
     )
-    #PIE GRAPH---------------------------------------------------------------------------------------------------------------
+    
     raw=pd.DataFrame({'FALLA':sampledata['FALLA']})
+
     s=raw['FALLA'].value_counts()
+
     new = pd.DataFrame({'FALLA':s.index, 'FRECUENCIA':s.values})
-    figure2=px.pie(new, values='FRECUENCIA', names='FALLA', title='Frecuencia de los Fallos.')  
-    
-    return(figure1, figure2)
 
- 
-def parse_data(proyect_id, component_type, start, end):
-    env=environment.Environment('production')
-    conx=db.SQLConnection(env)
-    conx.ExecuteQueryDataFrame(proyect_id, component_type, start, end)
-    conx.RemoveColumns()
-    
-    conx.StripString('FALLA')
-    return conx.GetDF()
+    figure2=px.pie(new, values='FRECUENCIA', names='FALLA', title='Frecuencia de los Fallos.')      
 
-def ReturnDefaultOrError(error):
-    fig = go.Figure()
-    iplot(fig)
-    return (fig, error)
+    return (figure1, figure2)
 
 if __name__ == '__main__':
     app.run_server(host='0.0.0.0', port='1237', debug=False, dev_tools_ui=False, dev_tools_props_check=False)
-    
-    

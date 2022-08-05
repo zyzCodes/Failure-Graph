@@ -181,13 +181,9 @@ def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, 
     for i in dftt['MINUTES']:
         total_productive_time+=i
     total_productive_time-=total_failure_time
-    print('####################################################################################')
     data=['Total Productive Time', total_productive_time]
     dftpt=pd.DataFrame([data], columns=['FALLA', 'MINUTES'])
     df=pd.concat([dftpt, df], ignore_index=True)
-    print(df)
-    
-    
     
     #BARCHART-----------------------------------------------------------------------------------------------------------
     figure1 = px.bar(sampledata, x='MINUTES', y='FALLA', color='FALLA', orientation='h')
@@ -226,25 +222,15 @@ def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, 
         minutelist.append(i)
     for i in df['FALLA']:
         failure_list2.append(i)
-        
-    print(minutelist)
-    print(failure_list2)
-   # figure2=px.pie(new, values='FRECUENCIA', names='FALLA', title='Faillure Frequency.')  
     
     figure2 = make_subplots(rows=1, cols=2, subplot_titles=['Failure Frecuency', 'Total Time = {0}'.format(total_time)], specs=[[{'type':'domain'}, {'type':'domain'}]])
     figure2.add_trace(go.Pie(labels=failure_list, values=frecuencylist, name="Failure Frecuency"),
               1, 1)
     
     
-    
-    
-    
     figure2.add_trace(go.Pie(labels=failure_list2, values=minutelist, name="Total Time"),
               1, 2)
     return(figure1, figure2)
-
-
-
  
 def parse_data(proyect_id, component_type, start, end):
     env=environment.Environment('production')

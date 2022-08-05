@@ -158,13 +158,9 @@ def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, 
     end_time=selected_dates[1]
     start_local_time=selected_dates[2]
     end_local_time=selected_dates[3]
-    print('####################################################################################')
-    print(start_time,end_time)
     now=datetime.datetime.strptime(end_time, '%Y-%m-%d %H:%M')
     then=datetime.datetime.strptime(start_time, '%Y-%m-%d %H:%M')
     total_time=now-then
-    print(total_time)
-    print('####################################################################################')
     #'2022-04-08 13:00:00', '2022-04-08 19:30:00'
     df = parse_data(proyect_id, component_type, start_time, end_time)  #makes query
 
@@ -174,11 +170,10 @@ def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, 
     sampledata['DIF']=pd.to_timedelta(sampledata['DIF'])
     sampledata.insert(1, 'MINUTES', sampledata['DIF'].dt.total_seconds().div(60).astype(int))
     del sampledata['DIF']
-    print(sampledata)
-    
     print('####################################################################################')
     df=sampledata
     data=['Tiempo Total', total_time]
+    print(total_time)
     dftt=pd.DataFrame([data], columns=['FALLA', 'DIF'])
     dftt.insert(1, 'MINUTES', dftt['DIF'].dt.total_seconds().div(60).astype(int))
     total_failure_time=0
@@ -195,11 +190,10 @@ def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, 
     print(df)
     
     
-    
     #BARCHART-----------------------------------------------------------------------------------------------------------
     figure1 = px.bar(sampledata, x='MINUTES', y='FALLA', color='FALLA', orientation='h')
     figure1.update_layout(
-        title=str(proyect_id)+' '+str(component_type)+' from time interval {0} to {1}.'.format(start_local_time, end_local_time),
+        title=str(proyect_id)+' '+str(component_type)+' from {0} to {1}.'.format(start_local_time, end_local_time),
         xaxis = dict(
             title='TIME (minutes)', 
             rangeslider = dict(
@@ -221,13 +215,28 @@ def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, 
     raw=pd.DataFrame({'FALLA':sampledata['FALLA']})
     s=raw['FALLA'].value_counts()
     new = pd.DataFrame({'FALLA':s.index, 'FRECUENCIA':s.values})
-    figure2=px.pie(new, values='FRECUENCIA', names='FALLA', title='Faillure Frequency.')  
+    failure_list=[]
+    frecuencylist=[]
+    minutelist=[]
+    for i in new['FRECUENCIA']:
+        frecuencylist.append(i)
+    for i in new['FALLA']:
+        failure_list.append(i)
+    for i in df['MINUTES']:
+        minutelist.append(i)
+    print(minutelist)
+   # figure2=px.pie(new, values='FRECUENCIA', names='FALLA', title='Faillure Frequency.')  
     
-    raw2=pd.DataFrame({'FALLA':df['FALLA']})
-    s1=raw2['FALLA'].value_counts()
-    new2 = pd.DataFrame({'FALLA':s1.index, 'FRECUENCIA':s1.values})
-    figure3=px.pie(new2, values='FRECUENCIA', names='FALLA', title='Faillure Frequency.')
+    figure2 = make_subplots(rows=1, cols=2, subplot_titles=['Failure Frecuency', 'Total Time = {0}'.format(total_time)], specs=[[{'type':'domain'}, {'type':'domain'}]])
+    figure2.add_trace(go.Pie(labels=failure_list, values=frecuencylist, name="Failure Frecuency"),
+              1, 1)
     
+    failure_list.insert(0, 'TOTAL PRODUCTIVE TIME (within time interval selected)')
+    
+    print(failure_list)
+    
+    figure2.add_trace(go.Pie(labels=failure_list, values=minutelist, name="Total Time"),
+              1, 2)
     return(figure1, figure2)
 
 

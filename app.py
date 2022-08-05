@@ -30,14 +30,14 @@ def optionlist(x):
     Returns option label and value that will be used 
     as the start-date/end-date input for the graph
     """
-    optionlista=[]
+    optionlist=[]
     for i in range(0,x+1):
         if i<=9:
             option={'label': '0{}'.format(i), 'value': '0{}'.format(i)}
         else:
             option={'label': '{}'.format(i), 'value': '{}'.format(i)}
-        optionlista.append(option)
-    return optionlista
+        optionlist.append(option)
+    return optionlist
 
 app.layout=html.Div([  
 #START PAGE CONENT--------------------------------------------------------------------------------------------------------
@@ -167,7 +167,7 @@ def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, 
 
     sampledata.insert(2, 'MINUTES', sampledata['DIF'].dt.total_seconds().div(60).astype(int))
 
-
+    print(sampledata)
 
 
     figure1 = px.bar(sampledata, x='MINUTES', y='FALLA', color='FALLA', orientation='h')

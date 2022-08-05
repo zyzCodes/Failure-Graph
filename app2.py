@@ -158,22 +158,9 @@ def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, 
         
     component_type=usf.getComponentType(changed_id)
     proyect_id=usf.getProyectId(changed_id)
-    #hour = datetime.datetime.now().hour
-    #date = datetime.datetime.now()
-    #week = (dt.isocalendar(date)[1])
-    #day = (dt.today().isoweekday())
-    #shift= usf.GetShift(hour)
-    #dates_to_query=usf.GetDatesToQuery(start_date, end_date, start_hour, start_minute, end_hour, end_minute)
-    
-    #if type(dates_to_query) is str:
-        #return ReturnDefaultOrError(dates_to_query)
-    #start = dates_to_query[0]
-    #end = dates_to_query[1]
-    #start_local=dates_to_query[2]
-    #end_local=dates_to_query[3]
     
     
-    df = parse_data(proyect_id, component_type, '2022-04-08 13:00:00', '2022-04-08 19:00:00')
+    df = parse_data(proyect_id, component_type, '2022-04-08 13:00:00', '2022-04-08 19:30:00')
     #except:
       #return ReturnDefaultOrError('The query could not be run or could not be connect to the database successfully.')
     
@@ -190,6 +177,8 @@ def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, 
 
     sampledata.insert(1, 'MINUTES', sampledata['DIF'].dt.total_seconds().div(60).astype(int))
     
+    sampledata['FALLA']=sampledata['FALLA'].str.strip()
+    
     print(sampledata)
     
     figure1 = px.bar(sampledata, x='MINUTES', y='FALLA', color='FALLA', orientation='h')
@@ -201,7 +190,7 @@ def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, 
                 visible=True, 
                 thickness=0.05
             )
-        ), 
+        ),
         yaxis = dict(
             title='FALLA'
             
@@ -222,7 +211,8 @@ def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, 
     figure2=px.pie(new, values='FRECUENCIA', names='FALLA', title='Frecuencia de los Fallos.')  
     
     return(figure1, figure2)
-    
+
+ 
 def parse_data(proyect_id, component_type, start, end):
     env=environment.Environment('production')
     conx=db.SQLConnection(env)

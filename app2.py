@@ -194,7 +194,7 @@ def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, 
             
         ), 
         paper_bgcolor='#FFFFFF', 
-        showlegend=True,
+        showlegend=False,
     )
     figure1.update_traces(
         width=0.5

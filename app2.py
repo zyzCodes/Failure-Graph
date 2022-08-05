@@ -159,15 +159,19 @@ def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, 
     component_type=usf.getComponentType(changed_id)
     proyect_id=usf.getProyectId(changed_id)
     
-    df = parse_data(proyect_id, component_type, '2022-04-08 13:00:00', '2022-04-08 19:30:00')  
+    selected_dates=usf.GetDatesToQuery(start_date, end_date, dropdown1, dropdown2, dropdown3, dropdown4)
+    start_time=selected_dates[0]
+    end_time=selected_dates[1]
+    start_local_time=selected_dates[2]
+    end_local_time=selected_dates[3]
+    
+    df = parse_data(proyect_id, component_type, '2022-04-08 13:00:00', '2022-04-08 19:30:00')  #makes query
 
     sampledata = df
     sampledata['DIF']=sampledata['DIF'].astype(str)
     sampledata['DIF']=sampledata['DIF'].str.slice(10,19)    
     sampledata['DIF']=pd.to_timedelta(sampledata['DIF'])
     sampledata.insert(1, 'MINUTES', sampledata['DIF'].dt.total_seconds().div(60).astype(int))
-    
-    
     print(sampledata)
     
     #BARCHART-----------------------------------------------------------------------------------------------------------

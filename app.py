@@ -21,12 +21,11 @@ colors = {'graphBackground':'#f5f5f5',
  'background':'#ffffff', 
  'text':'#000000'}
 
-
 app=dash.Dash(__name__, external_stylesheets=external_stylesheets)
 app.title='Project Failure - Dashboard'
 server=app.server
 
-
+changed_id='submit-val-01.n_clicks'
 
 def optionlist(x):
     """
@@ -121,6 +120,7 @@ app.layout=html.Div([
         html.Hr(style={'margin-bottom':'10px'}),
         dcc.Graph(id='Piegraph'),
     ], style={'margin':'20px'}),
+    
 
     html.Div([
         html.Hr(style={'margin-bottom': '10px'}),
@@ -128,18 +128,12 @@ app.layout=html.Div([
        # html.Label('Updated by Diego Arana'),
         html.Label('@ Eurotranciatura Mexico. July, 2022')
     ], style={'margin':'20px'}),
-    
-    
-    
 #END PAGE CONTENT------------------------------------------------------------------------------------------------------------------------------------------
 ])  
-
-
-changed_id='submit-val-01.n_clicks'
-
 @app.callback(
-    Output('Mygraph', 'figure'),
-    Output('Piegraph', 'figure'),
+    [Output('Mygraph', 'figure'),
+    Output('Piegraph', 'figure')],
+    #Output('piegraph-tpt', 'children'),
     [Input('submit-val-01', 'n_clicks'),
     Input('submit-val-02', 'n_clicks'),
     Input('interval-component', 'children')],
@@ -164,7 +158,13 @@ def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, 
     end_time=selected_dates[1]
     start_local_time=selected_dates[2]
     end_local_time=selected_dates[3]
-    
+    print('####################################################################################')
+    print(start_time,end_time)
+    now=datetime.datetime.strptime(end_time, '%Y-%m-%d %H:%M')
+    then=datetime.datetime.strptime(start_time, '%Y-%m-%d %H:%M')
+    total_time=now-then
+    print(total_time)
+    print('####################################################################################')
     #'2022-04-08 13:00:00', '2022-04-08 19:30:00'
     df = parse_data(proyect_id, component_type, start_time, end_time)  #makes query
 
@@ -173,7 +173,28 @@ def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, 
     sampledata['DIF']=sampledata['DIF'].str.slice(10,19)    
     sampledata['DIF']=pd.to_timedelta(sampledata['DIF'])
     sampledata.insert(1, 'MINUTES', sampledata['DIF'].dt.total_seconds().div(60).astype(int))
-    #print(sampledata)
+    del sampledata['DIF']
+    print(sampledata)
+    
+    print('####################################################################################')
+    df=sampledata
+    data=['Tiempo Total', total_time]
+    dftt=pd.DataFrame([data], columns=['FALLA', 'DIF'])
+    dftt.insert(1, 'MINUTES', dftt['DIF'].dt.total_seconds().div(60).astype(int))
+    total_failure_time=0
+    for i in sampledata['MINUTES']:
+        total_failure_time+=i
+    total_productive_time=0
+    for i in dftt['MINUTES']:
+        total_productive_time+=i
+    total_productive_time-=total_failure_time
+    print('####################################################################################')
+    data=['Total Productive Time', total_productive_time]
+    dftpt=pd.DataFrame([data], columns=['FALLA', 'MINUTES'])
+    df=pd.concat([dftpt, df], ignore_index=True)
+    print(df)
+    
+    
     
     #BARCHART-----------------------------------------------------------------------------------------------------------
     figure1 = px.bar(sampledata, x='MINUTES', y='FALLA', color='FALLA', orientation='h')
@@ -202,7 +223,14 @@ def update_output(b1, b2, interval, start_date, end_date, dropdown1, dropdown2, 
     new = pd.DataFrame({'FALLA':s.index, 'FRECUENCIA':s.values})
     figure2=px.pie(new, values='FRECUENCIA', names='FALLA', title='Faillure Frequency.')  
     
+    raw2=pd.DataFrame({'FALLA':df['FALLA']})
+    s1=raw2['FALLA'].value_counts()
+    new2 = pd.DataFrame({'FALLA':s1.index, 'FRECUENCIA':s1.values})
+    figure3=px.pie(new2, values='FRECUENCIA', names='FALLA', title='Faillure Frequency.')
+    
     return(figure1, figure2)
+
+
 
  
 def parse_data(proyect_id, component_type, start, end):

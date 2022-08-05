@@ -39,15 +39,13 @@ class SQLConnection:
 
     def RemoveColumns(self):
         lista = [
-         'Date', 'UTC Time', 'FECHAMASTIEMPO', 'TIPO']
+         'Date', 'UTC Time', 'FECHAMASTIEMPO', 'TIPO', 'ESTADO']
         for col in self.df.columns:
             if col in lista:
                 del self.df[col]
 
     def StripString(self, column):
         self.df[column]=self.df[column].str.strip()
-    
-        
 
     def GetDF(self):
         return self.df

@@ -1,6 +1,8 @@
 __pycache__
 venv
-secret.json
 data
+secret.json
+
+
 
 

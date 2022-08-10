@@ -1,3 +1,6 @@
 __pycache__
 venv
 secret.json
+
+
+data/proyectsids.json

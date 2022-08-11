@@ -11,7 +11,7 @@ source venv/scripts/activate
 2. Create a settings.json file in the root folder and populate Database Credentials
 3. Install requirements
 ```
-python install -r requirements.txt
+pip install -r requirements.txt
 ```
 4. Initiate the app
 ```
@@ -27,7 +27,7 @@ source venv/bin/activate
 2. Create a settings.json file in the root folder and populate Database Credentials
 3. Install requirements
 ```
-python3 install -r requirements.txt
+pip install -r requirements.txt
 ```
 4. Initiate the app
 ```
